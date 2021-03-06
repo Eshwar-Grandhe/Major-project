@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>
+            Login Page
+        </title>
+        <meta charset="utf-8">                
+        <link rel="stylesheet" href="/stylesheets/style.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    </head>
+    <body>
+      <!-- check form vaidation -->
+      <div class="container">
+        <% if (error && error.length > 0) {%>
+         <br>
+         <div class="alert alert-danger text-center" role="alert" id="close">
+            <%= error %>
+        </div>
+     <% } %>
+    <% if (success && success.length > 0) {%>
+        <br>
+    <div class="alert alert-success text-center" role="alert" id="close">
+     <%= success %>
+    </div>
+    <% } %>
+     </div>
+        <div class="place">
+            <h2>The Chef's Food</h2><br>
+        </div>
+        <div class="w3-container w3-white w3-panel w3-border w3-round-large size">
+        <form action="/login_chef" class="formset" method="POST">
+            <h2 id="log"><u>Chef Login</u></h2>
+            <h4>Username:</h4>
+            <input  class="w3-border w3-round" type="text" name="username" placeholder="example@gmail.com" required>
+            <h4 >Password:</h4>
+            <input  class="w3-border w3-round" type="password" name="password" placeholder="password" required>
+            <button class="w3-button w3-round w3-blue btn">Sign In</button><br>
+            <div class="anchor"><a href="/chefpassword_reset" >Forgot password?</a></div><br>
+            <div class="anchor">&nbsp&nbsp<a href="/chefsignup_page">Create account</a></div><br>
+            <div class="anchor">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<a href="/">Home</a></div>
+        </form>
+        </div>
+        <script src="../javascripts/timer.js"></script>
+    </body>
+</html>

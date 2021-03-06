@@ -1,0 +1,53 @@
+body{
+    background-image: url('background.jpg');
+    background-size: auto;
+}
+.place{
+    padding-top: 2rem;
+    text-align: center;
+    color:black;
+    
+}
+.size{
+   height: 800px;
+   width: 500px;
+   margin-left: auto;
+   margin-right: auto;
+   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.formset{
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 3rem;
+    padding-left: 4rem;
+}
+input{
+    width: 350px;
+    height: 40px;
+    padding-left: 1rem;
+}
+.btn{
+    margin-top: 3rem;
+    width: 200px;
+    margin-left: 5rem;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+   
+}
+.w3-button:hover{
+    background-color: #0974d1!important;
+    color: white!important;
+}
+.anchor{
+    text-decoration: none!important;
+    padding-top: 3rem;
+    padding-left: 7rem;
+    position:absolute;
+    color:#0974d1;
+}
+a{
+    text-decoration: none;
+}
+#log{
+    margin-left: auto;
+    margin-right: auto;
+}

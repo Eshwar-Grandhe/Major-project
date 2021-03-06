@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>
+            Login Page
+        </title>
+        <meta charset="utf-8">                
+        <link rel="stylesheet" href="/stylesheets/style2.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    </head>
+    <body>
+      <!-- check form vaidation -->
+      <div class="container">
+        <% if (error && error.length > 0) {%>
+         <br>
+         <div class="alert alert-danger text-center" role="alert" id="close">
+            <%= error %>
+        </div>
+     <% } %>
+    <% if (success && success.length > 0) {%>
+        <br>
+    <div class="alert alert-success text-center" role="alert" id="close">
+     <%= success %>
+    </div>
+    <% } %>
+     </div>
+        <div class="place">
+            <h2>The Chef's Food</h2><br>
+        </div>
+        <div class="w3-container w3-white w3-panel w3-border w3-round-large size">
+        <form action="/signupchef" class="formset" method="POST">
+            <h2 id="log"><u>Login</u></h2>
+            <h4>Username:</h4>
+            <input  class="w3-border w3-round" type="text" name="username" placeholder="example@gmail.com" required>
+            <h4>Mobile Number:</h4>
+            <input type="text" class="w3-border w3-round" name="mobile" required="required" placeholder="12345678910" />
+            <h4>Email:</h4>
+            <input type="text" class="w3-border w3-round" name="email" id="identity"  required="required" placeholder="example@mail.com">
+            <!-- <h4>Identity Number:</h4> -->
+			<!-- <input type="text" class="w3-border w3-round" name="identitynumber" id="identity"  required="required" placeholder="Voter Id Number "> -->
+			<!-- <h4>Experience:</h4> -->
+			<!-- <input type="text" class="w3-border w3-round" name="experience" id="identity"  required="required" placeholder="2 years "> -->
+            <h4 >Password:</h4>
+            <input  class="w3-border w3-round" type="password" name="password" placeholder="password" required>
+			<h4>Confirm Password:</h4>
+			<input type="password" class="w3-border w3-round" name="ConfirmPassword" id="password2" placeholder="Confirm Password" required>
+			<input type="submit"  class="w3-button w3-round w3-blue btn" value="Signup" />
+            <div class="anchor"><a href="/">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspHome</a></div>
+        </form>
+        </div>
+        <script src="../javascripts/timer.js"></script>
+    </body>
+</html>

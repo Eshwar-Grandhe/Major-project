@@ -21,6 +21,9 @@ var userSchema = new schema({
         required:true,
         unique:true,
     },
+    password:{
+        type:String
+    },
     resetPasswordToken: String,
     resetPasswordExpires: Date,   
     request:[{

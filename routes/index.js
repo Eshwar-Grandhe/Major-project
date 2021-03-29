@@ -2,11 +2,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const passport = require("passport");
 const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const { locals } = require('../app');
+
 const router = express.Router();
 
 const User = require('../models/users');
 const Chef = require('../models/chefs');
+const { session } = require('passport');
+const { Session } = require('express-session');
 
 
 // connecting to database #mongodb
@@ -69,6 +74,7 @@ router.get('/get_signin',(req,res,next)=>{
 
 /* USER homepage */
 router.get('/user_homepage',(req,res,next)=>{
+  console.log(req.session.user);
   res.render('user_homepage');
 });
 
@@ -100,6 +106,10 @@ router.get('/chef_homepage',(req,res,next)=>{
 /* USER Logout */
 router.get('/user_logout',function(req,res){
   req.logout();
+  req.session.destroy((err)=>{
+    if(err)
+    console.log("error destroying the session");
+  });
   if(!req.isAuthenticated())
     res.redirect('/signin');
   else
@@ -109,6 +119,10 @@ router.get('/user_logout',function(req,res){
 /* CHEF logout */
 router.get('/chef_logout',(req,res,next)=>{
   req.logout();
+  req.session.destroy((err)=>{
+    if(err)
+    console.log("error destroying the session");
+  });
   if(!req.isAuthenticated())
     res.redirect('/chef_signin');
   else
@@ -120,73 +134,82 @@ router.get('/chef_logout',(req,res,next)=>{
  --------------------------------------------------------------------------------------------------------------------------------------- */
 
  /* USER login */
-router.post("/login_user", (req, res, next) => {
-  passport.authenticate("User", (err, user, info) => {
-      if (err) {
-          return next(err);
+router.post('/login_user',(req,res)=>{
+    User.findOne({email:req.body.email},(err,result)=>{
+      if(err)
+      {
+        req.flash("error",err.message);
+        return res.redirect('/get_signin');
       }
-      if (!user) {
-          req.flash("error", info.message);
+      bcrypt.compare(req.body.password, result.password, function(err, response) {
+        if(response == true)
+        {
+          let redirectTo = req.session.redirectTo ? req.session.redirectTo : ('/user_homepage');
+          delete req.session.redirectTo;
+          req.session.user = result.email;
+          res.redirect(redirectTo);
+        }
+        else{
+          req.flash("error","Password incorrect");
           return res.redirect('/get_signin');
-      }
-      req.logIn(user, err => {
-          if (err) {
-              return next(err);
-          }
-            let redirectTo = req.session.redirectTo ? req.session.redirectTo : ('/user_homepage');
-            delete req.session.redirectTo;
-            res.redirect(redirectTo);
-      });
-  })(req, res, next);
-});
+        }
+    });
 
+    });
+});
 
  /* CHEF login */
- router.post("/login_chef", (req, res, next) => {
-  passport.authenticate("Chef", (err, user, info) => {
-      if (err) {
-          return next(err);
-      }
-      if (!user) {
-          req.flash("error", info.message);
-          return res.redirect('/get_chef_signin');
-      }
-      req.logIn(user, err => {
-          if (err) {
-              return next(err);
-          }
-            let redirectTo = req.session.redirectTo ? req.session.redirectTo : ('/chef_homepage');
-            delete req.session.redirectTo;
-            res.redirect(redirectTo);
-      });
-  })(req, res, next);
-});
+router.post('/login_chef',(req,res)=>{
 
+  Chef.findOne({email:req.body.email},(err,result)=>{
+    if(err)
+    {
+      req.flash("error",err.message);
+      return res.redirect('/get_chef_signin');
+    }
+    bcrypt.compare(req.body.password, result.password, function(err, response) {
+      if(response == true)
+      {
+        let redirectTo = req.session.redirectTo ? req.session.redirectTo : ('/chef_homepage');
+        delete req.session.redirectTo;
+        req.session.chef = result.email;
+        res.redirect(redirectTo);
+      }
+      else{
+        req.flash("error","Password incorrect");
+        return res.redirect('/get_chef_signin');
+      }
+  });
+
+  });
+
+})
 
 /* POST method for signup page user */
-router.post('/signupuser',function(req,res,next){
-  var newUser3 = new User({
-    username : req.body.username,
-    email:req.body.email,
-    mobile: req.body.mobile,
-    role:process.env.USER
-  });
-  User.register(newUser3, req.body.password, (err, user) => {
-    if (err) {
-        if (err.email === 'MongoError' && err.code === 11000) {
-            // Duplicate email
-            req.flash("error", "That email has already been registered.");
-            console.log(err);
-            return res.redirect('/get_signup');
-        }
-        // Some other error
-        req.flash("error",err.message);
-        console.log(err);
-        return res.redirect("/get_signup");
-    }
-    passport.authenticate("User")(req, res, () => {
-        req.flash("success", "Successfully Logged In " + user.username);
-        console.log(newUser3);
+router.post('/signupuser',(req,res)=>{
+
+  User.findOne({email:req.body.email},(err,result)=>{
+    if(!result)
+    {
+      bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+        // Store hash in your password DB.
+        var newUser3 = new User({
+          username : req.body.username,
+          email:req.body.email,
+          mobile: req.body.mobile,
+          role:process.env.USER,
+          password:hash,
+        });
+        newUser3.save((err,answer)=>{
+          if(err)
+          {
+            req.flash("error","Some error occured please try after some time");
+            return res.redirect("/get_signup");
+          }
+          console.log(answer);
+        });
+    
+      });
         var mail = newUser3.email;
         var mailOptions_user = {
           from: process.env.FROM_MAIL,
@@ -202,37 +225,54 @@ router.post('/signupuser',function(req,res,next){
             console.log('Email sent: ' + info.response);
           }
         }); 
-        res.redirect("/user_homepage");
-    });
-  });
+
+      return res.redirect("/user_homepage");
+    }
+    else if(err)
+    {
+      // ask the user to try again
+      req.flash("error",err.message);
+      console.log(err);
+      return res.redirect("/get_signup");
+    }
+    else
+    {
+      // that mail id already exists
+      req.flash("error","That email id already exits please use another one");
+      return res.redirect('/get_signup');
+    }
+    
+});
+
 });
 
 /* POST method for signup page chef*/
-router.post('/signupchef',function(req,res,next){
-  var newUser3 = new Chef({
-    username : req.body.username,
-    email:req.body.email,
-    mobile: req.body.mobile,
-    role:process.env.CHEF
-  });
-  Chef.register(newUser3, req.body.password, (err, user) => {
-    if (err) {
-        if (err.email === 'MongoError' && err.code === 11000) {
-            // Duplicate email
-            req.flash("error", "That email has already been registered.");
-            console.log(err);
-            return res.redirect('/get_chef_signup');
-        }
-        // Some other error
-        req.flash("error",err.message);
-        console.log(err);
-        return res.redirect("/get_chef_signup");
-    }
-    passport.authenticate("Chef")(req, res, () => {
-        req.flash("success", "Successfully Logged In " + user.username);
-        console.log(newUser3);
+router.post('/signupchef',(req,res)=>{
+
+  Chef.findOne({email:req.body.email},(err,result)=>{
+    if(!result)
+    {
+      bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+        // Store hash in your password DB.
+        var newUser3 = new Chef({
+          username : req.body.username,
+          email:req.body.email,
+          mobile: req.body.mobile,
+          role:process.env.CHEF,
+          password:hash
+        });
+        newUser3.save((err,answer)=>{
+          if(err)
+          {
+            req.flash("error","Some error occured please try after some time");
+            return res.redirect("/get_chef_signup");
+          }
+          console.log(answer);
+        });
+    
+      });
         var mail = newUser3.email;
-        var mailOptions_user = {
+          var mailOptions_user = {
           from: process.env.FROM_MAIL,
           to: mail,
           subject: 'Successfull registration',
@@ -246,10 +286,26 @@ router.post('/signupchef',function(req,res,next){
             console.log('Email sent: ' + info.response);
           }
         }); 
-        // change this
-        res.redirect("/chef_homepage");
-    });
-  });
+      return res.redirect("/chef_homepage");
+    }
+    else if(err)
+    {
+      // ask the user to try again
+      req.flash("error",err.message);
+      console.log(err);
+      return res.redirect("/get_chef_signup");
+    }
+    else
+    {
+      // that mail id already exists
+      req.flash("error","That email id already exits please use another one");
+      return res.redirect('/get_chef_signup');
+    }
+    
 });
+
+});
+
+
 
 module.exports = router;

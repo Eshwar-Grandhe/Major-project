@@ -46,7 +46,7 @@ img{
   margin-left:200px;
 }
 .pic{
-  background-image:url(../images/3.jpg);
+  background-image:url('../images/3.jpg');
   background-image:no-repeat;
   background-size:cover;
   

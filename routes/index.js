@@ -139,7 +139,6 @@ router.post("/reset/:token", (req, res) => {
             // Store hash in your password DB.
             user.resetPasswordToken = null;
             user.resetPasswordExpires = null;
-            console.log("before\n"+user);
             user.password = hash;
             user.save((err,answer)=>{
               if(err)
@@ -147,7 +146,6 @@ router.post("/reset/:token", (req, res) => {
                 req.flash("error","Some error occured please try after some time");
                 return res.redirect("/get_signup");
               }
-              console.log("hererr"+answer);
             });
             // add the login code here
             User.findOne({email:user.email},(err,result)=>{
@@ -159,6 +157,7 @@ router.post("/reset/:token", (req, res) => {
               bcrypt.compare(req.body.password, result.password, function(err, response) {
                 if(response == true)
                 {
+                  req.session.user = result.email;
                   done(err, user);
                 }
                 else{
@@ -198,6 +197,161 @@ router.post("/reset/:token", (req, res) => {
   ], err => {
     if (err) throw err;
     res.redirect("/user_homepage");
+  });
+});
+
+/*----------------------------------------------------------- for chef ---------------------------------------------------------------------*/
+
+// GET method for rendering the password reset page
+router.get('/get_chef_password_reset',(req,res)=>{
+  res.render('chefpassword_reset');
+});
+
+// GET method for password reset
+router.get("/chefpassword_reset", (req, res) => {
+  req.flash("success","Enter your email to change your password");
+  res.redirect("/get_chef_password_reset");
+});
+
+// Code for forgot password user
+router.post("/chefpassword_reset", (req, res, next) => {
+  // use waterfall to increase readability of the following callbacks
+  async.waterfall([
+    function(done) {
+      // generate random token
+      crypto.randomBytes(20, (err, buf) => {
+        let token = buf.toString("hex");
+        done(err, token);
+      });
+    },
+    function(token, done) {
+      // find who made the request and assign the token to them
+      Chef.findOne({ email: req.body.email }, (err, user) => {
+        if (err) throw err;
+        if (!user) {
+          req.flash("error", "That account doesn't exist.");
+          console.log("That account does not exists");
+          return res.redirect("/get_chef_password_reset");
+        }
+        
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // ms, 1hour
+        
+        user.save(err => done(err, token, user));
+      });
+    },
+    function(token, user, done) {
+      // indicate email account and the content of the confirmation letter
+      let mailOptions = {
+        from: process.env.FROM_MAIL,
+        to: user.email,
+        subject: "Reset your Account Password",
+        text: "Hi " + user.username + ",\n\n" +
+              "We've received a request to reset your password. If you didn't make the request, just ignore this email. Otherwise, you can reset your password using this link:\n\n" +
+              "http://" + req.headers.host + "/reset_chef/" + token + "\n\n" +
+              "Thanks.\n"+
+              "\n"+"The Chef's Food Team"
+      };
+      // send the email
+      transporter.sendMail(mailOptions, err => {
+        if (err) throw err;
+        console.log("mail sent");
+        req.flash("success", "An email has been sent to " + user.email + " with further instructions.");
+        done(err, "done");
+      });
+    }
+  ], err => {
+    if (err) return next(err);
+    res.redirect("/get_chef_password_reset");
+  });
+});
+
+// reset password ($gt -> selects those documents where the value is greater than)
+router.get("/reset_chef/:token", (req, res) => {
+  Chef.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+    if (err) throw err;
+    if (!user) {
+      req.flash("error", "Password reset token is invalid or has expired.");
+      res.redirect("/get_chef_password_reset");
+    } else { 
+       }
+       res.render("reset_chef", { token: req.params.token })
+  });
+});
+
+// update password
+router.post("/reset_chef/:token", (req, res) => {
+  async.waterfall([
+    function(done) {
+      Chef.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+        if (err) throw err;
+        if (!user) {
+          req.flash("error", "Password reset token is invalid or has expired.");
+          console.log("token is invalid or expired");
+          return res.redirect("/get_chef_password_reset");
+        }
+        // check password and confirm password
+        if (req.body.password === req.body.confirm) {
+
+          bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+            // Store hash in your password DB.
+            user.resetPasswordToken = null;
+            user.resetPasswordExpires = null;
+            user.password = hash;
+            user.save((err,answer)=>{
+              if(err)
+              {
+                req.flash("error","Some error occured please try after some time");
+                return res.redirect("/get_chef_signin");
+              }
+            });
+            // add the login code here
+            Chef.findOne({email:user.email},(err,result)=>{
+              if(err)
+              {
+                req.flash("error",err.message);
+                return res.redirect('/get_chef_signin');
+              }
+              bcrypt.compare(req.body.password, result.password, function(err, response) {
+                if(response == true)
+                {
+                  req.session.chef = result.email;
+                  done(err, user);
+                }
+                else{
+                  req.flash("error","Password incorrect");
+                  return res.redirect('/get_chef_signin');
+                }
+              });
+            });
+          });
+        } else {
+          req.flash("error", "Passwords do not match");
+          console.log("Password dont match");
+          return res.redirect("back");
+        } 
+      });
+    },
+    function(user, done) {
+      let mailOptions = {
+        from: process.env.FROM_MAIL,
+        to: user.email,
+        subject: "Your Account Password has been changed",
+        text: "Hi " + user.username + ",\n\n" +
+              "This is a confirmation that the password for your account " + user.email + "  has just been changed.\n\n" +
+              "Best,\n"+
+              "The Chef's Team\n"
+      };
+      transporter.sendMail(mailOptions, err => {
+        if (err) throw err;
+        req.flash("success", "Your password has been changed.");
+        console.log("Password changed");
+        done(err);
+      });
+    },
+  ], err => {
+    if (err) throw err;
+    res.redirect("/chef_homepage");
   });
 });
 
@@ -433,7 +587,6 @@ router.post('/signupchef',(req,res)=>{
           console.log(answer);
         });
     
-      });
         var mail = newUser3.email;
           var mailOptions_user = {
           from: process.env.FROM_MAIL,
@@ -449,6 +602,8 @@ router.post('/signupchef',(req,res)=>{
             console.log('Email sent: ' + info.response);
           }
         }); 
+      });
+
       return res.redirect("/chef_homepage");
     }
     else if(err)

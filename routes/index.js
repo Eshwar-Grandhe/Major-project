@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const passport = require("passport");
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+var async = require("async");
+var crypto = require("crypto");
 const saltRounds = 10;
 const { locals } = require('../app');
 
@@ -36,6 +38,167 @@ var transporter = nodemailer.createTransport({
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
+});
+/* --------------------------------------------------------------------------------------------------------------------------------------- 
+//                                                            Password reset code
+ --------------------------------------------------------------------------------------------------------------------------------------- */
+
+/*----------------------------------------------------------- for user ---------------------------------------------------------------------*/
+// GET method for rendering the password reset page
+router.get('/get_password_reset',(req,res)=>{
+  res.render('password_reset');
+});
+
+// GET method for password reset
+router.get("/password_reset", (req, res) => {
+  req.flash("success","Enter your email to change your password");
+  res.redirect("/get_password_reset");
+});
+
+router.post("/password_reset", (req, res, next) => {
+  // use waterfall to increase readability of the following callbacks
+  async.waterfall([
+    function(done) {
+      // generate random token
+      crypto.randomBytes(20, (err, buf) => {
+        let token = buf.toString("hex");
+        done(err, token);
+      });
+    },
+    function(token, done) {
+      // find who made the request and assign the token to them
+      User.findOne({ email: req.body.email }, (err, user) => {
+        if (err) throw err;
+        if (!user) {
+
+          req.flash("error", "That account doesn't exist");
+          console.log("That account does not exists");
+          return res.redirect("/get_password_reset");
+        }
+        
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 3600000; // ms, 1hour
+        
+        user.save(err => done(err, token, user));
+      });
+    },
+    function(token, user, done) {
+      // indicate email account and the content of the confirmation letter
+      let mailOptions = {
+        from: process.env.FROM_MAIL,
+        to: user.email,
+        subject: "Reset your Account Password",
+        text: "Hi " + user.username + ",\n\n" +
+              "We've received a request to reset your password. If you didn't make the request, just ignore this email. Otherwise, you can reset your password using this link:\n\n" +
+              "http://" + req.headers.host + "/reset/" + token + "\n\n" +
+              "Thanks.\n"+
+              "\n"+"The Chef's Food Team"
+      };
+      // send the email
+      transporter.sendMail(mailOptions, err => {
+        if (err) throw err;
+        console.log("mail sent");
+        req.flash("success", "An email has been sent to " + user.email + " with further instructions.");
+        done(err, "done");
+      });
+    }
+  ], err => {
+    if (err) return next(err);
+    res.redirect("/get_password_reset");
+  });
+});
+
+// reset password ($gt -> selects those documents where the value is greater than)
+router.get("/reset/:token", (req, res) => {
+  User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+    if (err) throw err;
+    if (!user) {
+      req.flash("error", "Password reset token is invalid or has expired.");
+      res.redirect("/get_password_reset");
+    } else { 
+       }
+       res.render("reset", { token: req.params.token })
+  });
+});
+
+// update password
+router.post("/reset/:token", (req, res) => {
+  async.waterfall([
+    function(done) {
+      User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
+        if (err) throw err;
+        if (!user) {
+          req.flash("error", "Password reset token is invalid or has expired.");
+          console.log("token is invalid or expired");
+          return res.redirect("/get_password_reset");
+        }
+        // check password and confirm password
+        if (req.body.password === req.body.confirm) {
+
+          bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+            // Store hash in your password DB.
+            user.resetPasswordToken = null;
+            user.resetPasswordExpires = null;
+            console.log("before\n"+user);
+            user.password = hash;
+            user.save((err,answer)=>{
+              if(err)
+              {
+                req.flash("error","Some error occured please try after some time");
+                return res.redirect("/get_signup");
+              }
+              console.log("hererr"+answer);
+            });
+            // add the login code here
+            User.findOne({email:user.email},(err,result)=>{
+              if(err)
+              {
+                req.flash("error",err.message);
+                return res.redirect('/get_signin');
+              }
+              bcrypt.compare(req.body.password, result.password, function(err, response) {
+                if(response == true)
+                {
+                  done(err, user);
+                }
+                else{
+                  req.flash("error","Password incorrect");
+                  return res.redirect('/get_signin');
+                }
+            });
+        
+            });
+
+          });
+        }
+         else {
+          req.flash("error", "Passwords do not match");
+          console.log("Password dont match");
+          return res.redirect("back");
+        } 
+      });
+    },
+    function(user, done) {
+      let mailOptions = {
+        from: process.env.FROM_MAIL,
+        to: user.email,
+        subject: "Your Account Password has been changed",
+        text: "Hi " + user.username + ",\n\n" +
+              "This is a confirmation that the password for your account " + user.email + "  has just been changed.\n\n" +
+              "Best,\n"+
+              "The Chef's Team\n"
+      };
+      transporter.sendMail(mailOptions, err => {
+        if (err) throw err;
+        req.flash("success", "Your password has been changed.");
+        console.log("Password changed");
+        done(err);
+      });
+    },
+  ], err => {
+    if (err) throw err;
+    res.redirect("/user_homepage");
+  });
 });
 
 /* --------------------------------------------------------------------------------------------------------------------------------------- 
@@ -74,7 +237,6 @@ router.get('/get_signin',(req,res,next)=>{
 
 /* USER homepage */
 router.get('/user_homepage',(req,res,next)=>{
-  console.log(req.session.user);
   res.render('user_homepage');
 });
 
@@ -209,7 +371,7 @@ router.post('/signupuser',(req,res)=>{
           console.log(answer);
         });
     
-      });
+
         var mail = newUser3.email;
         var mailOptions_user = {
           from: process.env.FROM_MAIL,
@@ -224,7 +386,8 @@ router.post('/signupuser',(req,res)=>{
           } else {
             console.log('Email sent: ' + info.response);
           }
-        }); 
+        });
+      }); 
 
       return res.redirect("/user_homepage");
     }

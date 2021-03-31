@@ -7,11 +7,13 @@
     "dev": "nodemon app.js"
   },
   "dependencies": {
+    "async": "^3.2.0",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
     "connect-mongodb-session": "^2.4.1",
     "cookie-parser": "^1.4.5",
+    "crypto": "^1.0.1",
     "debug": "~2.6.9",
     "dotenv": "^8.2.0",
     "ejs": "~2.6.1",

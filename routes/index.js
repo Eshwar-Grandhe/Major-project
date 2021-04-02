@@ -14,6 +14,7 @@ const User = require('../models/users');
 const Chef = require('../models/chefs');
 const { session } = require('passport');
 const { Session } = require('express-session');
+const { response } = require('express');
 
 
 // connecting to database #mongodb
@@ -391,7 +392,7 @@ router.get('/get_signin',(req,res,next)=>{
 
 /* USER homepage */
 router.get('/user_homepage',(req,res,next)=>{
-  res.render('user_homepage');
+  res.render('user_homepage',{chef:'',disp:0});
 });
 
 /* CHEF signin page */
@@ -445,9 +446,133 @@ router.get('/chef_logout',(req,res,next)=>{
     console.log("There is some error in if part");
 });
 
+/* show chefs */
+router.get('/showchefs',(req,res)=>{
+  User.findOne({email:req.session.user},(err,ans)=>{
+    if(err)
+    console.log(err);
+    if(ans.check)
+    {
+      req.flash("error","You can request only one chef at a time");
+      res.redirect('/user_homepage');
+    }
+    else
+    {
+      Chef.find({check:false},(err,result)=>{
+        if(err)
+        console.log(err);
+        if(result == '')
+        res.render('user_homepage',{chef:result,disp:1});
+        else
+        res.render('user_homepage',{chef:result,disp:0});
+      });
+    }
+  });
+
+});
+
+/* updating user profile */
+router.get('/updateuser',(req,res)=>{
+  User.findOne({email:req.session.user},(err,result)=>{
+    if(err)
+    console.log(err);
+    res.render('updateuser',{list:result,disp:1});
+  });
+});
+
+// cancel user request
+router.get('/cancel',(req,res)=>{
+  User.findOne({email:req.session.user},(err, ans)=>{
+    if(err)
+    console.log(err);
+    if(ans.request == "" )
+    {
+      req.flash("error","No request to cancel");
+      res.redirect('/user_homepage');
+    }
+    else
+    {
+      Chef.findOneAndUpdate({email:ans.request[0].email},{request:""},(err,response)=>{
+        if(err)
+        console.log(err);
+      });
+      User.findOneAndUpdate({email:req.session.user},{request:'',check:false},(err,response)=>{
+        if(err)
+        console.log(err);
+        req.flash("success","Cancelled the request sucessfully");
+        res.redirect('/user_homepage');
+      });
+    }
+
+  });
+
+});
+
+// User requests
+router.get('/myrequest',(req,res)=>{
+  User.findOne({email:req.session.user},(err,result)=>{
+    if(err)
+    console.log(err);
+    const obj = result.request[0];
+    if(result.request[0]!='')
+    res.render('user_requests',{request:obj});
+    else
+    res.render('user_requests',{request:''});
+  });
+});
+
 /* --------------------------------------------------------------------------------------------------------------------------------------- 
 //                                                            POST Methods
  --------------------------------------------------------------------------------------------------------------------------------------- */
+
+// book a chef
+router.post('/bookchef',(req,res)=>{
+  console.log(req.body.email);
+  User.findOne({email:req.session.user},(err,result)=>{
+    if(err)
+    console.log(err);
+    // console.log(result)
+    var requestobj = {
+      username:result.username,
+      mobile:result.mobile,
+      email:result.email,
+    };
+    // console.log(requestobj)
+    Chef.findOneAndUpdate({email:req.body.email},{request:requestobj,check:true},(err,response)=>{
+      if(err)
+      console.log(err);
+      // console.log("this is the respone\n"+response);
+    });
+  });
+  Chef.findOne({email:req.body.email},(err,result)=>{
+    if(err)
+    console.log(err);
+    var requestobj = {
+      username:result.username,
+      mobile:result.mobile,
+      email:result.email,
+    };
+    User.findOneAndUpdate({email:req.session.user},{request:requestobj,check:true},(err,response)=>{
+      if(err)
+      console.log(err);
+      // console.log(response);
+    });
+  });
+  req.flash("success","Request sent to chef");
+  res.redirect('/user_homepage');
+});
+
+// update user details
+router.post('/update_user',(req,res)=>{
+
+  User.updateOne({email:req.session.user},{$set : {username:req.body.username, mobile:req.body.mobile}},(err,response)=>{
+    if(err)
+    console.log(err);
+  });
+  req.flash("success","updated details successfully");
+  res.redirect('/user_homepage');
+
+});
 
  /* USER login */
 router.post('/login_user',(req,res)=>{
@@ -515,6 +640,7 @@ router.post('/signupuser',(req,res)=>{
           mobile: req.body.mobile,
           role:process.env.USER,
           password:hash,
+          check:0
         });
         newUser3.save((err,answer)=>{
           if(err)
@@ -576,7 +702,8 @@ router.post('/signupchef',(req,res)=>{
           email:req.body.email,
           mobile: req.body.mobile,
           role:process.env.CHEF,
-          password:hash
+          password:hash,
+          check:0
         });
         newUser3.save((err,answer)=>{
           if(err)

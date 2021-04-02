@@ -8,21 +8,54 @@
     <title>user home page</title>
 </head>
 <body>
-    <div class="container">
+    <div class="container" >
         <% if (error && error.length > 0) {%>
          <br>
-         <div class="alert alert-danger text-center" role="alert">
+         <div class="alert alert-danger text-center" id="close" role="alert">
             <%= error %>
         </div>
      <% } %>
     <% if (success && success.length > 0) {%>
         <br>
-    <div class="alert alert-success text-center" role="alert">
+    <div class="alert alert-success text-center" id="close" role="alert">
      <%= success %>
     </div>
     <% } %>
      </div>
     <h1>user home page</h1>
+
     <a href="/user_logout">logout</a>
+    <br>
+    <a href="/showchefs">show chefs</a>
+    <br>
+    <a href="/cancel">Cancel</a>
+    <br>
+    <a href="/updateuser">Update my profile</a>
+    <br>
+    <a href="/myrequest">My request</a>
+    <br>
+     <% if(chef && disp == 0) { %>
+        <h2>List of chefs available</h2>
+
+    <%  chef.forEach(chef => {%>
+        <% if(chef.check == false ) {%>
+           <hr>
+            <form action="/bookchef" method="POST">
+                <ul>
+                    <li> <h3><%= chef.username %></h3></li>
+                    <li> <h3><%= chef.mobile %></h3></li>
+                    <li> <h3 name="email"><%= chef.email %></h3></li>
+                    <input type="text" name="email" value="<%= chef.email %>" hidden/>
+                    <li><a href="#" target="_blank"><button>Chat</button></a></li><br>
+                    <li><input type="submit" value="Book chef" ></li>
+                </ul>
+            </form>
+           <hr>  
+    <%}})%>
+
+    <% } if(chef == '' && disp == 1){ %>
+        <h2>No chefs available right now</h2>
+        <% } %>
+        <script src="javascripts/timer.js"></script>
 </body>
 </html>

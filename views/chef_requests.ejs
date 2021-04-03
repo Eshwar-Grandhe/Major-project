@@ -5,11 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <title>User Request Page</title>
+    <title>Chef Request Page</title>
 </head>
 <body>
     <h2>
-        User's recent requested chef
+        Chef's recent request from user
     </h2>
     <% if(request) {%>
         <hr>
@@ -19,11 +19,9 @@
             <li>Email: <%= request.email %></li>
             <% if(request.check == false ) {%>
                 <li>Status: not Accepted</li>
+                <li><a href="/accept">Accept</a></li>
             <% }  else { %>
                 <li>Status: Accepted</li>
-                <li><a href="#" target="_blank">Track chef</a></li>
-                <li><a href="/servicedone">Service done</a></li>
-
             <% } %>
         </ul>
         <hr>
@@ -33,6 +31,6 @@
         <% if(request == '') {%>
             <h2>You don't have any recent request</h2>
         <% } %>
-        <a href="/user_homepage">homepage</a>
+        <a href="/chef_homepage">homepage</a>
 </body>
 </html>

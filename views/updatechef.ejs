@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>
+            update info page
+        </title>
+        <meta charset="utf-8">                
+        <link rel="stylesheet" href="/stylesheets/style2.css">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    </head>
+    <body>
+        <h1>Retype your details to update</h1>
+
+        <div class="place">
+            <h2>The Chef's Food</h2><br>
+        </div>
+        <div class="w3-container w3-white w3-panel w3-border w3-round-large size">
+        <form action="/update_chef" class="formset" method="POST">
+            <h2 id="log"><u>Chef Update Info</u></h2>
+            <h4>Username:</h4>
+            <input  class="w3-border w3-round" type="text" name="username" required value=<%= list.username %>  />
+            <h4>Mobile Number:</h4>
+            <input type="text" class="w3-border w3-round" name="mobile" required="required" value=<%= list.mobile %> />
+            <h4>Email:</h4>
+            <input type="email" class="w3-border w3-round" name="email" id="identity"  required="required" value=<%= list.email %> />
+			<input type="submit"  class="w3-button w3-round w3-blue btn" value="update" />
+            <div class="anchor"><a href="/chef_homepage">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsphomepage</a></div>
+        </form>
+        </div>
+        <script src="/javascripts/timer.js"></script>
+    </body>
+</html>

@@ -521,13 +521,112 @@ router.get('/myrequest',(req,res)=>{
   });
 });
 
+// setting chef not available
+router.get('/notavailable',(req,res)=>{
+  Chef.findOneAndUpdate({email:req.session.chef},{check:true},(err,response)=>{
+    if(err)
+    console.log(err);
+    req.flash("success","Status \"not available\" set successfully");
+    res.redirect('/chef_homepage');
+  });
+});
+
+// setting chef available
+router.get('/available',(req,res)=>{
+  Chef.findOneAndUpdate({email:req.session.chef},{check:false},(err,response)=>{
+    if(err)
+    console.log(err);
+    req.flash("success","Status \"available\" set successfully");  
+    res.redirect('/chef_homepage');
+  });
+});
+
+// updating chef profile
+router.get('/update_chef',(req,res)=>{
+  Chef.findOne({email:req.session.chef},(err,result)=>{
+    if(err)
+    console.log(err);
+    res.render('updatechef',{list:result,disp:1});
+  });
+});
+
+// User requests
+router.get('/chefrequest',(req,res)=>{
+  Chef.findOne({email:req.session.chef},(err,result)=>{
+    if(err)
+    console.log(err);
+    const obj = result.request[0];
+    if(result.request[0]!='')
+    res.render('chef_requests',{request:obj});
+    else
+    res.render('chef_requests',{request:''});
+  });
+});
+
+// accept the user request
+router.get('/accept',(req,res)=>{
+  Chef.findOne({email:req.session.chef},(err,ans)=>{
+    if(err)
+    console.log(err);
+    if(ans.check == false)
+    {
+      Chef.findOneAndUpdate({email:req.session.chef},{check:true},(err,result)=>{
+        if(err)
+        console.log(err);
+        const obj = result.request[0];
+        User.findOneAndUpdate({email:obj.email},{check:true},(err,response)=>{
+          if(err)
+          console.log(err);
+        });
+        req.flash("success","Accepted the request")
+        res.redirect('/chef_homepage');
+      });
+    }
+    else
+    {
+      req.flash("error","Request can be accepted only once");
+      res.redirect('/chef_homepage');
+    }
+  })
+});
+
+// Service done by user
+router.get('/servicedone',(req,res)=>{
+  User.findOne({email:req.session.user},(err,result)=>{
+    if(err)
+    console.log(err);
+    const obj = result.request[0];
+    Chef.findOneAndUpdate({email:obj.email},{request:'',check:false},(err,response)=>{
+      if(err)
+      console.log(err);
+    });
+    User.findOneAndUpdate({email:result.email},{request:'',check:false},(err,ans)=>{
+      if(err)
+      console.log(err);
+    });
+    req.flash("success","Thank you for using the service");
+    res.redirect('/user_homepage');
+  });
+})
+
 /* --------------------------------------------------------------------------------------------------------------------------------------- 
 //                                                            POST Methods
  --------------------------------------------------------------------------------------------------------------------------------------- */
 
+ // update chef details
+router.post('/update_chef',(req,res)=>{
+
+  Chef.updateOne({email:req.session.chef},{$set : {username:req.body.username, mobile:req.body.mobile}},(err,response)=>{
+    if(err)
+    console.log(err);
+  });
+  req.flash("success","updated details successfully");
+  res.redirect('/chef_homepage');
+
+});
+
 // book a chef
 router.post('/bookchef',(req,res)=>{
-  console.log(req.body.email);
   User.findOne({email:req.session.user},(err,result)=>{
     if(err)
     console.log(err);
@@ -640,7 +739,8 @@ router.post('/signupuser',(req,res)=>{
           mobile: req.body.mobile,
           role:process.env.USER,
           password:hash,
-          check:0
+          check:false,
+          request:''
         });
         newUser3.save((err,answer)=>{
           if(err)
@@ -703,7 +803,8 @@ router.post('/signupchef',(req,res)=>{
           mobile: req.body.mobile,
           role:process.env.CHEF,
           password:hash,
-          check:0
+          check:false,
+          request:''
         });
         newUser3.save((err,answer)=>{
           if(err)

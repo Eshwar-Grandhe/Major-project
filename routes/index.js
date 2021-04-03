@@ -76,11 +76,27 @@ router.post("/password_reset", (req, res, next) => {
           console.log("That account does not exists");
           return res.redirect("/get_password_reset");
         }
-        
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // ms, 1hour
-        
-        user.save(err => done(err, token, user));
+        // console.log(typeof(user));
+        // user.resetPasswordToken = token;
+        // user.resetPasswordExpires = Date.now() + 3600000; // ms, 1hour
+        User.findOneAndUpdate({email:req.body.email},{resetPasswordToken:token,resetPasswordExpires:Date.now() + 3600000},(err, response)=>{
+          if(err)
+          console.log(err);
+          console.log("here\n"+response);
+          
+        });
+        User.findOne({email:req.body.email},(err,ans)=>{
+          if(err)
+          console.log(err);
+          done(err, token, ans);
+        });
+        // user.save((err,response)=>{
+        //   if(err)
+        //   console.log(err);
+        //   console.log(response);
+        //   done(err, token, user);
+        // });
+        // user.save(err => done(err, token, user));
       });
     },
     function(token, user, done) {
@@ -138,16 +154,23 @@ router.post("/reset/:token", (req, res) => {
 
           bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
             // Store hash in your password DB.
-            user.resetPasswordToken = null;
-            user.resetPasswordExpires = null;
-            user.password = hash;
-            user.save((err,answer)=>{
+            User.findOneAndUpdate({resetPasswordToken: req.params.token},{resetPasswordToken:null,resetPasswordExpires:null,password:hash},(err,ans)=>{
               if(err)
-              {
-                req.flash("error","Some error occured please try after some time");
-                return res.redirect("/get_signup");
-              }
+              console.log(err);
+
             });
+            // user.resetPasswordToken = null;
+            // user.resetPasswordExpires = null;
+            // user.password = hash;
+            // user.save((err,answer)=>{
+            //   if(err)
+            //   {
+            //     req.flash("error","Some error occured please try after some time");
+            //     return res.redirect("/get_signup");
+            //   }
+
+            //   console.log(answer);
+            // });
             // add the login code here
             User.findOne({email:user.email},(err,result)=>{
               if(err)
@@ -235,10 +258,21 @@ router.post("/chefpassword_reset", (req, res, next) => {
           return res.redirect("/get_chef_password_reset");
         }
         
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // ms, 1hour
+        // user.resetPasswordToken = token;
+        // user.resetPasswordExpires = Date.now() + 3600000; // ms, 1hour
         
-        user.save(err => done(err, token, user));
+        // user.save(err => done(err, token, user));
+        Chef.findOneAndUpdate({email:req.body.email},{resetPasswordToken:token,resetPasswordExpires:Date.now() + 3600000},(err, response)=>{
+          if(err)
+          console.log(err);
+          console.log("here\n"+response);
+          
+        });
+        Chef.findOne({email:req.body.email},(err,ans)=>{
+          if(err)
+          console.log(err);
+          done(err, token, ans);
+        });
       });
     },
     function(token, user, done) {
@@ -296,16 +330,21 @@ router.post("/reset_chef/:token", (req, res) => {
 
           bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
             // Store hash in your password DB.
-            user.resetPasswordToken = null;
-            user.resetPasswordExpires = null;
-            user.password = hash;
-            user.save((err,answer)=>{
+            Chef.findOneAndUpdate({resetPasswordToken: req.params.token},{resetPasswordToken:null,resetPasswordExpires:null,password:hash},(err,ans)=>{
               if(err)
-              {
-                req.flash("error","Some error occured please try after some time");
-                return res.redirect("/get_chef_signin");
-              }
+              console.log(err);
+
             });
+            // user.resetPasswordToken = null;
+            // user.resetPasswordExpires = null;
+            // user.password = hash;
+            // user.save((err,answer)=>{
+            //   if(err)
+            //   {
+            //     req.flash("error","Some error occured please try after some time");
+            //     return res.redirect("/get_chef_signin");
+            //   }
+            // });
             // add the login code here
             Chef.findOne({email:user.email},(err,result)=>{
               if(err)
@@ -492,7 +531,7 @@ router.get('/cancel',(req,res)=>{
     }
     else
     {
-      Chef.findOneAndUpdate({email:ans.request[0].email},{request:""},(err,response)=>{
+      Chef.findOneAndUpdate({email:ans.request[0].email},{request:"",check:false},(err,response)=>{
         if(err)
         console.log(err);
       });
@@ -513,7 +552,8 @@ router.get('/myrequest',(req,res)=>{
   User.findOne({email:req.session.user},(err,result)=>{
     if(err)
     console.log(err);
-    const obj = result.request[0];
+    let obj = result.request[0];
+    obj.check = result.check;
     if(result.request[0]!='')
     res.render('user_requests',{request:obj});
     else
@@ -555,7 +595,8 @@ router.get('/chefrequest',(req,res)=>{
   Chef.findOne({email:req.session.chef},(err,result)=>{
     if(err)
     console.log(err);
-    const obj = result.request[0];
+    let obj = result.request[0];
+    obj.check = result.check;
     if(result.request[0]!='')
     res.render('chef_requests',{request:obj});
     else
@@ -637,7 +678,7 @@ router.post('/bookchef',(req,res)=>{
       email:result.email,
     };
     // console.log(requestobj)
-    Chef.findOneAndUpdate({email:req.body.email},{request:requestobj,check:true},(err,response)=>{
+    Chef.findOneAndUpdate({email:req.body.email},{request:requestobj},(err,response)=>{
       if(err)
       console.log(err);
       // console.log("this is the respone\n"+response);
@@ -651,7 +692,7 @@ router.post('/bookchef',(req,res)=>{
       mobile:result.mobile,
       email:result.email,
     };
-    User.findOneAndUpdate({email:req.session.user},{request:requestobj,check:true},(err,response)=>{
+    User.findOneAndUpdate({email:req.session.user},{request:requestobj},(err,response)=>{
       if(err)
       console.log(err);
       // console.log(response);
@@ -740,11 +781,12 @@ router.post('/signupuser',(req,res)=>{
           role:process.env.USER,
           password:hash,
           check:false,
-          request:''
+          request:[]
         });
         newUser3.save((err,answer)=>{
           if(err)
           {
+            console.log(err);
             req.flash("error","Some error occured please try after some time");
             return res.redirect("/get_signup");
           }
@@ -804,7 +846,7 @@ router.post('/signupchef',(req,res)=>{
           role:process.env.CHEF,
           password:hash,
           check:false,
-          request:''
+          request:[]
         });
         newUser3.save((err,answer)=>{
           if(err)

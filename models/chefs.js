@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var schema = mongoose.Schema;
-var passportLocalMongoose = require("passport-local-mongoose");
+// var passportLocalMongoose = require("passport-local-mongoose");
 
 var chefSchema = new schema({
     username:{
@@ -37,5 +37,5 @@ var chefSchema = new schema({
     }
     
 })
-chefSchema.plugin(passportLocalMongoose);
+// chefSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model('chef',chefSchema);

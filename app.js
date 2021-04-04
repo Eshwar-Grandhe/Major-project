@@ -5,15 +5,15 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
-var passport = require("passport");
+// var passport = require("passport");
 var flash = require('connect-flash');
 var bodyParser = require('body-parser');
-LocalStrategy = require("passport-local").Strategy;
+// LocalStrategy = require("passport-local").Strategy;
 var MongoDBStore = require('connect-mongodb-session')(session);
 var moment = require('moment');
 
-const User = require('./models/users');
-const Chef = require('./models/chefs');
+// const User = require('./models/users');
+// const Chef = require('./models/chefs');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -57,28 +57,28 @@ app.use(session({
 }));
 
 // passport code
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-passport.use('User',new LocalStrategy(User.authenticate()));
-passport.use('Chef',new LocalStrategy(Chef.authenticate()));
+// passport.use('User',new LocalStrategy(User.authenticate()));
+// passport.use('Chef',new LocalStrategy(Chef.authenticate()));
 
-passport.serializeUser(function(user, done) {
-  done(null, user);
-});
+// passport.serializeUser(function(user, done) {
+//   done(null, user);
+// });
 
-passport.deserializeUser(function(u, done) {
-  if(u.role == 'chef')
-  {
-    Chef.findById(u._id,function(err, r){
-      done(err, r._id);
-    });
-  }
-  else
-  User.findById(u._id, function(err, user) {
-    done(err, user._id);
-  });
-});
+// passport.deserializeUser(function(u, done) {
+//   if(u.role == 'chef')
+//   {
+//     Chef.findById(u._id,function(err, r){
+//       done(err, r._id);
+//     });
+//   }
+//   else
+//   User.findById(u._id, function(err, user) {
+//     done(err, user._id);
+//   });
+// });
 
 // passport.serializeUser(User.serializeUser());
 // passport.deserializeUser(User.deserializeUser());
@@ -105,9 +105,9 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-
-app.listen((process.env.PORT || 5000), function () {
-  console.log("The Server Has Started! at port 5000");
+const PORT = process.env.PORT || 5000 ;
+app.listen(PORT, function () {
+  console.log(`The Server Has Started! at port ${PORT}`);
 });
 
 module.exports = app;

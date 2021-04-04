@@ -1,12 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const passport = require("passport");
+// const passport = require("passport");
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 var async = require("async");
 var crypto = require("crypto");
 const saltRounds = 10;
 const { locals } = require('../app');
+var middleware = require("../middleware");
+
 
 const router = express.Router();
 
@@ -40,11 +42,13 @@ var transporter = nodemailer.createTransport({
   res.locals.error = req.flash("error");
   next();
 });
+
 /* --------------------------------------------------------------------------------------------------------------------------------------- 
 //                                                            Password reset code
  --------------------------------------------------------------------------------------------------------------------------------------- */
 
 /*----------------------------------------------------------- for user ---------------------------------------------------------------------*/
+
 // GET method for rendering the password reset page
 router.get('/get_password_reset',(req,res)=>{
   res.render('password_reset');
@@ -428,7 +432,7 @@ router.get('/get_signin',(req,res,next)=>{
 });
 
 /* USER homepage */
-router.get('/user_homepage',(req,res,next)=>{
+router.get('/user_homepage',middleware.checkAuthentication,(req,res,next)=>{
   res.render('user_homepage',{chef:'',disp:0});
 });
 
@@ -453,7 +457,7 @@ router.get('/get_chef_signup',(req,res,next)=>{
 });
 
 /* CHEF homepage */
-router.get('/chef_homepage',(req,res,next)=>{
+router.get('/chef_homepage',middleware.checkchefAuthentication,(req,res,next)=>{
   res.render('chef_homepage');
 });
 
@@ -464,6 +468,7 @@ router.get('/user_logout',function(req,res){
     if(err)
     console.log("error destroying the session");
   });
+  console.log(req.isAuthenticated())
   if(!req.isAuthenticated())
     res.redirect('/signin');
   else
@@ -483,8 +488,8 @@ router.get('/chef_logout',(req,res,next)=>{
     console.log("There is some error in if part");
 });
 
-/* show chefs */
-router.get('/showchefs',(req,res)=>{
+/* Show chefs */
+router.get('/showchefs',middleware.checkAuthentication,(req,res)=>{
   User.findOne({email:req.session.user},(err,ans)=>{
     if(err)
     console.log(err);
@@ -508,8 +513,8 @@ router.get('/showchefs',(req,res)=>{
 
 });
 
-/* updating user profile */
-router.get('/updateuser',(req,res)=>{
+/* Updating user profile route */
+router.get('/updateuser',middleware.checkAuthentication,(req,res)=>{
   User.findOne({email:req.session.user},(err,result)=>{
     if(err)
     console.log(err);
@@ -517,13 +522,14 @@ router.get('/updateuser',(req,res)=>{
   });
 });
 
-// cancel user request
-router.get('/cancel',(req,res)=>{
+/* Cancel user request */
+router.get('/cancel',middleware.checkAuthentication,(req,res)=>{
   User.findOne({email:req.session.user},(err, ans)=>{
     if(err)
     console.log(err);
     if(ans.request == "" )
     {
+      // if there is not request to cancel
       req.flash("error","No request to cancel");
       res.redirect('/user_homepage');
     }
@@ -545,8 +551,8 @@ router.get('/cancel',(req,res)=>{
 
 });
 
-// User requests
-router.get('/myrequest',(req,res)=>{
+/* User requests */
+router.get('/myrequest',middleware.checkAuthentication,(req,res)=>{
   User.findOne({email:req.session.user},(err,result)=>{
     if(err)
     console.log(err);
@@ -559,8 +565,8 @@ router.get('/myrequest',(req,res)=>{
   });
 });
 
-// setting chef not available
-router.get('/notavailable',(req,res)=>{
+/* Setting chef not available */
+router.get('/notavailable',middleware.checkchefAuthentication,(req,res)=>{
   Chef.findOneAndUpdate({email:req.session.chef},{check:true},(err,response)=>{
     if(err)
     console.log(err);
@@ -569,8 +575,8 @@ router.get('/notavailable',(req,res)=>{
   });
 });
 
-// setting chef available
-router.get('/available',(req,res)=>{
+/* Setting chef available */
+router.get('/available',middleware.checkchefAuthentication,(req,res)=>{
   Chef.findOneAndUpdate({email:req.session.chef},{check:false},(err,response)=>{
     if(err)
     console.log(err);
@@ -579,8 +585,8 @@ router.get('/available',(req,res)=>{
   });
 });
 
-// updating chef profile
-router.get('/update_chef',(req,res)=>{
+/* Updating chef profile */
+router.get('/update_chef',middleware.checkchefAuthentication,(req,res)=>{
   Chef.findOne({email:req.session.chef},(err,result)=>{
     if(err)
     console.log(err);
@@ -588,8 +594,8 @@ router.get('/update_chef',(req,res)=>{
   });
 });
 
-// User requests
-router.get('/chefrequest',(req,res)=>{
+/* Chef requests */
+router.get('/chefrequest',middleware.checkchefAuthentication,(req,res)=>{
   Chef.findOne({email:req.session.chef},(err,result)=>{
     if(err)
     console.log(err);
@@ -602,13 +608,14 @@ router.get('/chefrequest',(req,res)=>{
   });
 });
 
-// accept the user request
-router.get('/accept',(req,res)=>{
+/* Accept the user request */
+router.get('/accept',middleware.checkchefAuthentication,(req,res)=>{
   Chef.findOne({email:req.session.chef},(err,ans)=>{
     if(err)
     console.log(err);
     if(ans.check == false)
     {
+      // if not false accept request code
       Chef.findOneAndUpdate({email:req.session.chef},{check:true},(err,result)=>{
         if(err)
         console.log(err);
@@ -623,14 +630,15 @@ router.get('/accept',(req,res)=>{
     }
     else
     {
+      // to allow only once
       req.flash("error","Request can be accepted only once");
       res.redirect('/chef_homepage');
     }
   })
 });
 
-// Service done by user
-router.get('/servicedone',(req,res)=>{
+/* Service done by user */
+router.get('/servicedone',middleware.checkAuthentication,(req,res)=>{
   User.findOne({email:req.session.user},(err,result)=>{
     if(err)
     console.log(err);
@@ -652,9 +660,9 @@ router.get('/servicedone',(req,res)=>{
 //                                                            POST Methods
  --------------------------------------------------------------------------------------------------------------------------------------- */
 
- // update chef details
+ /* Update chef details */
 router.post('/update_chef',(req,res)=>{
-
+  // updating chef details to DB
   Chef.updateOne({email:req.session.chef},{$set : {username:req.body.username, mobile:req.body.mobile}},(err,response)=>{
     if(err)
     console.log(err);
@@ -664,22 +672,19 @@ router.post('/update_chef',(req,res)=>{
 
 });
 
-// book a chef
+/* Book a chef */
 router.post('/bookchef',(req,res)=>{
   User.findOne({email:req.session.user},(err,result)=>{
     if(err)
     console.log(err);
-    // console.log(result)
     var requestobj = {
       username:result.username,
       mobile:result.mobile,
       email:result.email,
     };
-    // console.log(requestobj)
     Chef.findOneAndUpdate({email:req.body.email},{request:requestobj},(err,response)=>{
       if(err)
       console.log(err);
-      // console.log("this is the respone\n"+response);
     });
   });
   Chef.findOne({email:req.body.email},(err,result)=>{
@@ -693,16 +698,15 @@ router.post('/bookchef',(req,res)=>{
     User.findOneAndUpdate({email:req.session.user},{request:requestobj},(err,response)=>{
       if(err)
       console.log(err);
-      // console.log(response);
     });
   });
   req.flash("success","Request sent to chef");
   res.redirect('/user_homepage');
 });
 
-// update user details
+/* Update user details */
 router.post('/update_user',(req,res)=>{
-
+ // updating user details to DB 
   User.updateOne({email:req.session.user},{$set : {username:req.body.username, mobile:req.body.mobile}},(err,response)=>{
     if(err)
     console.log(err);
@@ -720,6 +724,7 @@ router.post('/login_user',(req,res)=>{
         req.flash("error",err.message);
         return res.redirect('/get_signin');
       }
+      // use bcrypt to check
       bcrypt.compare(req.body.password, result.password, function(err, response) {
         if(err)
         console.log(err);
@@ -731,6 +736,7 @@ router.post('/login_user',(req,res)=>{
           res.redirect(redirectTo);
         }
         else{
+          // incorrect password
           req.flash("error","Password incorrect");
           return res.redirect('/get_signin');
         }
@@ -748,6 +754,7 @@ router.post('/login_chef',(req,res)=>{
       req.flash("error",err.message);
       return res.redirect('/get_chef_signin');
     }
+    // use bycrypt to check
     bcrypt.compare(req.body.password, result.password, function(err, response) {
       if(response == true)
       {
@@ -757,6 +764,7 @@ router.post('/login_chef',(req,res)=>{
         res.redirect(redirectTo);
       }
       else{
+        // incorrect password
         req.flash("error","Password incorrect");
         return res.redirect('/get_chef_signin');
       }
@@ -766,7 +774,7 @@ router.post('/login_chef',(req,res)=>{
 
 })
 
-/* POST method for signup page user */
+/* Signup page user */
 router.post('/signupuser',(req,res)=>{
 
   User.findOne({email:req.body.email},(err,result)=>{
@@ -790,10 +798,9 @@ router.post('/signupuser',(req,res)=>{
             req.flash("error","Some error occured please try after some time");
             return res.redirect("/get_signup");
           }
-          console.log(answer);
         });
     
-
+        // code to send mail to user after registeration
         var mail = newUser3.email;
         var mailOptions_user = {
           from: process.env.FROM_MAIL,
@@ -831,7 +838,7 @@ router.post('/signupuser',(req,res)=>{
 
 });
 
-/* POST method for signup page chef*/
+/* Signup page chef */
 router.post('/signupchef',(req,res)=>{
 
   Chef.findOne({email:req.body.email},(err,result)=>{
@@ -856,7 +863,7 @@ router.post('/signupchef',(req,res)=>{
           }
           console.log(answer);
         });
-    
+        // code to send mail to chef after registration
         var mail = newUser3.email;
           var mailOptions_user = {
           from: process.env.FROM_MAIL,

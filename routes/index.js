@@ -265,7 +265,6 @@ router.post("/chefpassword_reset", (req, res, next) => {
         Chef.findOneAndUpdate({email:req.body.email},{resetPasswordToken:token,resetPasswordExpires:Date.now() + 3600000},(err, response)=>{
           if(err)
           console.log(err);
-          console.log("here\n"+response);
           
         });
         Chef.findOne({email:req.body.email},(err,ans)=>{
@@ -317,7 +316,7 @@ router.get("/reset_chef/:token", (req, res) => {
 // update password
 router.post("/reset_chef/:token", (req, res) => {
   async.waterfall([
-    function(done) {
+     function(done) {
       Chef.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, (err, user) => {
         if (err) throw err;
         if (!user) {
@@ -328,12 +327,11 @@ router.post("/reset_chef/:token", (req, res) => {
         // check password and confirm password
         if (req.body.password === req.body.confirm) {
 
-          bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+          bcrypt.hash(req.body.password, saltRounds, async function(err, hash) {
             // Store hash in your password DB.
-            Chef.findOneAndUpdate({resetPasswordToken: req.params.token},{resetPasswordToken:null,resetPasswordExpires:null,password:hash},(err,ans)=>{
+              await Chef.findOneAndUpdate({resetPasswordToken: req.params.token},{resetPasswordToken:null,resetPasswordExpires:null,password:hash},(err,ans)=>{
               if(err)
               console.log(err);
-
             });
             // user.resetPasswordToken = null;
             // user.resetPasswordExpires = null;
@@ -346,7 +344,7 @@ router.post("/reset_chef/:token", (req, res) => {
             //   }
             // });
             // add the login code here
-            Chef.findOne({email:user.email},(err,result)=>{
+           await Chef.findOne({email:user.email},(err,result)=>{
               if(err)
               {
                 req.flash("error",err.message);
@@ -723,6 +721,8 @@ router.post('/login_user',(req,res)=>{
         return res.redirect('/get_signin');
       }
       bcrypt.compare(req.body.password, result.password, function(err, response) {
+        if(err)
+        console.log(err);
         if(response == true)
         {
           let redirectTo = req.session.redirectTo ? req.session.redirectTo : ('/user_homepage');

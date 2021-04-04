@@ -468,7 +468,6 @@ router.get('/user_logout',function(req,res){
     if(err)
     console.log("error destroying the session");
   });
-  console.log(req.isAuthenticated())
   if(!req.isAuthenticated())
     res.redirect('/signin');
   else
@@ -493,7 +492,7 @@ router.get('/showchefs',middleware.checkAuthentication,(req,res)=>{
   User.findOne({email:req.session.user},(err,ans)=>{
     if(err)
     console.log(err);
-    if(ans.check)
+    if(ans.request[0])
     {
       req.flash("error","You can request only one chef at a time");
       res.redirect('/user_homepage');

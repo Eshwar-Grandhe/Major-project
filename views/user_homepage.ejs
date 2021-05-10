@@ -47,9 +47,14 @@
                     <li> <h3><%= chef.mobile %></h3></li>
                     <li> <h3 name="email"><%= chef.email %></h3></li>
                     <input type="text" name="email" value="<%= chef.email %>" hidden/>
-                    <li><a href="#" target="_blank"><button>Chat</button></a></li><br>
                     <li><input type="submit" value="Book chef" ></li>
                 </ul>
+            </form>
+            <form action="/chat" method="POST" target="_blank">
+            <ul>
+                <input type="text" name="email" value="<%= chef.email %>" hidden/>
+                <!-- <li><input type="submit" value="Chat" ></li> -->
+            </ul>
             </form>
            <hr>  
     <%}})%>

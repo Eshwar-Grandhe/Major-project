@@ -1,6 +1,6 @@
 body{
-    background-image: url('../images/chef1.png');
-    background-size: auto;
+    background-image: url("../images/chef1.jpg");
+    background-size: cover;
 }
 .place{
     padding-top: 2rem;

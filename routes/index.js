@@ -14,7 +14,7 @@ const router = express.Router();
 
 const User = require('../models/users');
 const Chef = require('../models/chefs');
-const { session } = require('passport');
+// const { session } = require('passport');
 const { Session } = require('express-session');
 const { response } = require('express');
 
@@ -463,28 +463,28 @@ router.get('/chef_homepage',middleware.checkchefAuthentication,(req,res,next)=>{
 
 /* USER Logout */
 router.get('/user_logout',function(req,res){
-  req.logout();
+  // req.logout();
   req.session.destroy((err)=>{
     if(err)
     console.log("error destroying the session");
   });
-  if(!req.isAuthenticated())
+  // if(!req.isAuthenticated())
     res.redirect('/signin');
-  else
-  console.log("There is some error in if part");
+  // else
+  // console.log("There is some error in if part");
 });
 
 /* CHEF logout */
 router.get('/chef_logout',(req,res,next)=>{
-  req.logout();
+  // req.logout();
   req.session.destroy((err)=>{
     if(err)
     console.log("error destroying the session");
   });
-  if(!req.isAuthenticated())
+  // if(!req.isAuthenticated())
     res.redirect('/chef_signin');
-  else
-    console.log("There is some error in if part");
+  // else
+    // console.log("There is some error in if part");
 });
 
 /* Show chefs */
@@ -555,7 +555,12 @@ router.get('/myrequest',middleware.checkAuthentication,(req,res)=>{
   User.findOne({email:req.session.user},(err,result)=>{
     if(err)
     console.log(err);
+    
     let obj = result.request[0];
+    if(obj == undefined)
+    {
+      return res.render('user_requests',{request:''});
+    }
     obj.check = result.check;
     if(result.request[0]!='')
     res.render('user_requests',{request:obj});
@@ -653,7 +658,14 @@ router.get('/servicedone',middleware.checkAuthentication,(req,res)=>{
     req.flash("success","Thank you for using the service");
     res.redirect('/user_homepage');
   });
-})
+});
+
+/* Chat page */
+router.post('/chat',(req,res)=>{
+  // console.log('here'+req.body.email)
+  
+  res.render('chat');
+});
 
 /* --------------------------------------------------------------------------------------------------------------------------------------- 
 //                                                            POST Methods
@@ -880,7 +892,7 @@ router.post('/signupchef',(req,res)=>{
         }); 
       });
 
-      return res.redirect("/chef_homepage");
+      return res.render("chef_homepage");
     }
     else if(err)
     {

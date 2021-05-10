@@ -9,7 +9,7 @@ middlewareObj.checkAuthentication = function (req, res, next) {
         
         User.findOne({email:req.session.user}, (err, foundGroup) => {
             if (err || !foundGroup) {
-                req.logout();
+                // req.logout();
                 console.log("logged out");
                 req.flash("error", "You Cannot Do that, kindly get authenticated");
                 res.redirect("/get_signin");
@@ -25,7 +25,7 @@ middlewareObj.checkchefAuthentication = function (req, res, next) {
 
         Chef.findOne({email:req.session.chef}, (err, foundGroup) => {
             if (err || !foundGroup) {
-                req.logout();
+                // req.logout();
                 req.flash("error", "You Cannot Do that, kindly get authenticated");
                 res.redirect("/get_chef_signup");
             } else {

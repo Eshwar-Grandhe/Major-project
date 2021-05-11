@@ -8,6 +8,20 @@
   <title>home page</title>
 </head>
 <body>
+  <div class="container">
+    <% if (error && error.length > 0) {%>
+     <br>
+     <div class="alert alert-danger text-center" role="alert">
+        <%= error %>
+    </div>
+ <% } %>
+<% if (success && success.length > 0) {%>
+    <br>
+<div class="alert alert-success text-center" role="alert">
+ <%= success %>
+</div>
+<% } %>
+  </div>
   <h1>welcome to home page</h1>
   <a href="/chef_signin">chef signin</a><br>
   <a href='/signin'>SignIn</a><br>

@@ -798,6 +798,10 @@ router.get("/chefEmergency",(req,res)=>{
   res.render("chefEmergency");
 });
 
+// delete user 
+router.get("/deleteuser",(req,res)=>{
+  res.render("deleteuser");
+})
 /* --------------------------------------------------------------------------------------------------------------------------------------- 
 //                                                            POST Methods
  --------------------------------------------------------------------------------------------------------------------------------------- */
@@ -925,6 +929,14 @@ router.post('/login_user',(req,res)=>{
         req.flash("error",err.message);
         return res.redirect('/get_signin');
       }
+      if(result == null)
+      {
+        // incorrect password
+        req.flash("error", "No account with that mail exits");
+        return res.redirect('/get_signin');
+      }
+      else
+      {
       bcrypt.compare(req.body.password, result.password, function(err, response) {
         if(err)
         {
@@ -945,6 +957,7 @@ router.post('/login_user',(req,res)=>{
           return res.redirect('/get_signin');
         }
       });
+    }
 
     });
     
@@ -958,6 +971,14 @@ router.post('/login_user',(req,res)=>{
         return res.redirect('/get_signin');
       }
       // use bcrypt to check
+      if(result == null)
+      {
+        // incorrect password
+        req.flash("error", "No account with that mail exits");
+        return res.redirect('/get_signin');
+      }
+      else
+      {
       bcrypt.compare(req.body.password, result.password, function(err, response) {
         if(err)
         {
@@ -977,7 +998,7 @@ router.post('/login_user',(req,res)=>{
           return res.redirect('/get_signin');
         }
       });
-
+    }
     });
 
   }
@@ -993,6 +1014,14 @@ router.post('/login_chef',(req,res)=>{
       req.flash("error",err.message);
       return res.redirect('/get_chef_signin');
     }
+    if(result == null)
+    {
+      // incorrect password
+      req.flash("error", "No account with that mail exits");
+      return res.redirect('/get_chef_signin');
+    }
+    else 
+    {
     // use bycrypt to check
     bcrypt.compare(req.body.password, result.password, function(err, response) {
       if(err)
@@ -1013,7 +1042,7 @@ router.post('/login_chef',(req,res)=>{
         return res.redirect('/get_chef_signin');
       }
   });
-
+}
   });
 
 });
@@ -1061,6 +1090,7 @@ router.post('/login_chef',(req,res)=>{
            }
          });
        }); 
+       req.flash("success","Welcome to chefs food");
        return res.redirect("/get_user_homepage");
      }
      else if(err)

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>admin resource page</title>
+</head>
+<body>
+
+    <h1>admin resource page</h1>
+
+    <a href="/admin_homepage">Home</a>
+
+     <% if(order) { %>
+        <h2>List of orders </h2>
+
+    <%  order.forEach(order => {%>
+           <hr>     
+                <h2>User Details</h2>       
+                <ul>
+                    <li>User username: <h3><%= order.user.username %></h3></li>
+                    <li>Email: <h3><%= order.user[0].email %></h3></li>
+                    <li>Mobile: <h3><%= order.user[0].mobile %></h3></li>
+                </ul>
+                <h2>Chef Details</h2>
+                <ul>
+                    <li>Chef username: <h3><%= order.chef[0].username %></h3></li>
+                    <li>Email: <h3><%= order.chef[0].email %></h3></li>
+                    <li>Mobile: <h3><%= order.chef[0].mobile %></h3></li>
+                </ul> 
+    <%})%>
+
+    <% } %>
+
+    <script src="javascripts/timer.js"></script>
+</body>
+</html>

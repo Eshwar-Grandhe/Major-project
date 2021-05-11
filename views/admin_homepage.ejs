@@ -5,12 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <title>Chef Home Page</title>
+    <title>Admin home page</title>
 </head>
 <body>
-    <h4>Incase of any emergency or other. Please press the Emergency button for contact details</h4>
-
-    <div class="container">
+    <div class="container" >
         <% if (error && error.length > 0) {%>
          <br>
          <div class="alert alert-danger text-center" id="close" role="alert">
@@ -24,20 +22,18 @@
     </div>
     <% } %>
      </div>
-    <h1>chef home page</h1>
-    <a href="/chef_logout">logout</a>
+    <h1>admin home page</h1>
+     <!-- admin logout -->
+    <a href="/user_logout">logout</a>
     <br>
-    <a href="/notavailable">set not available</a>
+    <a href="/chef_signup">Register Chef</a>
     <br>
-    <a href="/update_chef">update profile</a>
+    <a href="/deletechef">Delete Chef</a>
     <br>
-    <a href="/available">set available</a>
+    <a href="/vieworders">View All recent orders</a>
     <br>
-    <a href="/chefrequest">my requests</a>
+    <a href="/viewchefs">View All Chefs</a>
     <br>
-    <a href="/chefEmergency">Emergency</a>
-    <br>
-
 
     <script src="javascripts/timer.js"></script>
 </body>

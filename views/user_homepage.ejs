@@ -5,9 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <title>user home page</title>
+    <title>User home page</title>
 </head>
 <body>
+    <h4>Incase of any emergency or other. Please press the Emergency for contact details</h4><br>
+    <p>Payment is COD and pricing depends on the chef</p>
+    <p>Please verify the chef with details shown in your "My request" feature and allow him accordingly</p>
     <div class="container" >
         <% if (error && error.length > 0) {%>
          <br>
@@ -33,6 +36,10 @@
     <a href="/updateuser">Update my profile</a>
     <br>
     <a href="/myrequest">My request</a>
+    <br>
+    <a href="/userEmergency">Emergency</a>
+    <br>
+    <a href="/deleteuser">Delete my account</a>
     <br>
     
      <% if(chef && disp == 0) { %>

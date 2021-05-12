@@ -5,6 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/stylesheets/img.css">
   <title>home page</title>
 </head>
 <body>
@@ -22,9 +23,13 @@
 </div>
 <% } %>
   </div>
-  <h1>welcome to home page</h1>
-  <a href="/chef_signin">chef signin</a><br>
-  <a href='/signin'>SignIn</a><br>
-  <a href='/signup'>SignUp</a>
+  <h1 style="margin-left: 100px; margin-top: 100px;"><b>The Chef's Food</b></h1>
+  <div style="margin-top: 50px; margin-left: 100px;">
+    <button class="btn-primary rounded btn" onclick="location.href='/chef_signin'">Chef SignIn</button><br /><br />
+    <button class="btn-primary rounded btn" onclick="location.href='/signin'">SignIn</button><br /><br />
+    <button class="btn-primary rounded btn" onclick="location.href='/signup'">SignUp</button><br /><br />
+    <!-- <a href='/signin'>SignIn</a><br><br />
+    <a href='/signup'>SignUp</a><br /> -->
+  </div>
 </body>
 </html>

@@ -9,10 +9,10 @@ footer {
     left: 0;
     bottom: 0;
     width: 100%;
-<<<<<<< HEAD
     /* background-color: red; */
-=======
->>>>>>> master
     color: black;
     text-align: center;
   }
+  .btn-primary.rounded.btn {
+    width: 150px;
+}

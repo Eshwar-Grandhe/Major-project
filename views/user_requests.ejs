@@ -5,14 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/stylesheets/img.css">
     <title>User Request Page</title>
 </head>
 <body>
+<div style="margin-left: 25px;">
+
     <h2>
         User's recent requested chef
     </h2>
     <% if(request) {%>
-        <hr>
+       
         <ul>
             <li>Name: <%= request.username %></li>
             <li>Mobile: <%= request.mobile %></li>
@@ -21,18 +24,19 @@
                 <li>Status: not Accepted</li>
             <% }  else { %>
                 <li>Status: Accepted</li>
-                <!-- <li><a href="#" target="_blank">Track chef</a></li> -->
                 <li><a href="/servicedone">Service done</a></li>
 
             <% } %>
         </ul>
-        <hr>
+       
         <% } %>
 
 
         <% if(request == '') {%>
-            <h2>You don't have any recent request</h2>
+            <h2><br />You don't have any recent request</h2>
         <% } %>
-        <a href="/user_homepage">homepage</a>
+        <br />
+        <a href="/user_home">homepage</a>
+ </div>
 </body>
 </html>

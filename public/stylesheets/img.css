@@ -1,0 +1,15 @@
+body{
+    /* png format not working */
+    background-image: url('../images/chef1.jpg');
+    background-repeat:no-repeat ;
+    background-size: cover;
+}
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    /* background-color: red; */
+    color: black;
+    text-align: center;
+  }

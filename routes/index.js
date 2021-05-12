@@ -518,9 +518,9 @@ router.get('/showchefs',middleware.checkAuthentication,(req,res)=>{
         return res.redirect("/user_homepage");
         }
         if(result == '')
-        res.render('user_homepage',{chef:result,disp:1});
+        res.render('userExperiment',{chef:result,disp:1});
         else
-        res.render('user_homepage',{chef:result,disp:0});
+        res.render('userExperiment',{chef:result,disp:0});
       });
     }
   });
@@ -547,13 +547,13 @@ router.get('/cancel',middleware.checkAuthentication,(req,res)=>{
     {
     console.log(err);
     req.flash("error","some error occured");
-    return res.redirect("/user_homepage");
+    return res.redirect("/user_homeExperiment");
     }
     if(ans.request == "" )
     {
       // if there is not request to cancel
       req.flash("error","No request to cancel");
-      res.redirect('/user_homepage');
+      res.redirect('/user_homeExperiment');
     }
     else
     {
@@ -562,7 +562,7 @@ router.get('/cancel',middleware.checkAuthentication,(req,res)=>{
         {
         console.log(err);
         req.flash("error","some error occured");
-        return res.redirect("/user_homepage");
+        return res.redirect("/user_homeExperiment");
         }
       });
       User.findOneAndUpdate({email:req.session.user},{request:'',check:false},(err,response)=>{
@@ -570,10 +570,10 @@ router.get('/cancel',middleware.checkAuthentication,(req,res)=>{
         {
         console.log(err);
         req.flash("error","some error occured");
-        return res.redirect("/user_homepage");
+        return res.redirect("/user_homeExperiment");
         }
         req.flash("success","Cancelled the request sucessfully");
-        res.redirect('/user_homepage');
+        res.redirect('/user_homeExperiment');
       });
     }
 
@@ -588,7 +588,7 @@ router.get('/myrequest',middleware.checkAuthentication,(req,res)=>{
     {
     console.log(err);
     req.flash("error","some error occured");
-    return res.redirect("/user_homepage");
+    return res.redirect("/user_homeExperiment");
     }
     
     let obj = result.request[0];
@@ -801,7 +801,12 @@ router.get("/chefEmergency",(req,res)=>{
 // delete user 
 router.get("/deleteuser",(req,res)=>{
   res.render("deleteuser");
-})
+});
+
+// user expeirement
+router.get("/user_homeExperiment",(req,res)=>{
+  res.render("userExperiment",{chef:'',disp:0});
+});
 /* --------------------------------------------------------------------------------------------------------------------------------------- 
 //                                                            POST Methods
  --------------------------------------------------------------------------------------------------------------------------------------- */
@@ -987,7 +992,9 @@ router.post('/login_user',(req,res)=>{
         }
         if(response == true)
         {
-          let redirectTo = req.session.redirectTo ? req.session.redirectTo : ('/user_homepage');
+          req.flash("success","welcome");
+
+          let redirectTo = req.session.redirectTo ? req.session.redirectTo : ("/user_homeExperiment")//('/user_homepage');
           delete req.session.redirectTo;
           req.session.user = result.email;
           res.redirect(redirectTo);

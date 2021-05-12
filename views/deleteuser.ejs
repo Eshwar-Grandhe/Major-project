@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/stylesheets/img.css">
     <title>user resource page</title>
 </head>
+
 <body>
 
-    <h1>user resource page</h1>
+    <div style="margin-left: 25px;">
+        <h1>user resource page</h1>
 
-    <a href="/user_homepage">Home</a>
-    <h2>Enter your email to delete your account</h2>
-    <div class="container">
-        <form action="/deleteuser" method="POST">
-            <h4>Email:</h4>
-            <input  class="w3-border w3-round" type="text" name="email" placeholder="example@gmail.com" required>
-            <button class="w3-button w3-round btn btn-danger">Delete</button><br>
+        <a href="/user_home">Home</a>
+        <h2>Enter your email to delete your account</h2>
+        <div class="container">
+            <form action="/deleteuser" method="POST">
+                <h4>Email:</h4>
+                <input class="w3-border w3-round" type="text" name="email" placeholder="example@gmail.com" required>
+                <button class="w3-button w3-round btn btn-danger">Delete</button><br>
 
-        </form>
+            </form>
+        </div>
     </div>
 
     <script src="javascripts/timer.js"></script>
 </body>
+
 </html>

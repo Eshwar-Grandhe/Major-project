@@ -8,9 +8,11 @@
     <title>Chef Request Page</title>
 </head>
 <body>
+<div style="margin-left: 25px;">
     <h2>
         Chef's recent request from user
     </h2>
+    <br />
     <% if(request) {%>
         <hr>
         <ul>
@@ -32,5 +34,6 @@
             <h2>You don't have any recent request</h2>
         <% } %>
         <a href="/chef_homepage">homepage</a>
+</div>
 </body>
 </html>
